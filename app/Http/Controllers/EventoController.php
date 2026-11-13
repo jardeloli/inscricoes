@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Evento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class EventoController extends Controller
 {
@@ -28,7 +29,8 @@ class EventoController extends Controller
             'vagas' => 'required|integer|min:1',
             'valor' => 'required|numeric|min:0',
         ]);
-        $evento = Evento::create($dados);
+        $evento = $request->user()->eventos()->create($dados);
+        
         return response()->json($evento, 201);
     }
 
@@ -53,6 +55,9 @@ class EventoController extends Controller
             'vagas' => 'sometimes|required|integer|min:1',
             'valor' => 'sometimes|required|numeric|min:0',
         ]);
+
+        Gate::authorize('update', $evento);
+        // ... validação e update, como antes ...
         $evento->update($dados);
         return $evento;
     }
@@ -62,6 +67,8 @@ class EventoController extends Controller
      */
     public function destroy(Evento $evento)
     {
+        Gate::authorize('delete', $evento);
+        // ... delete, como antes ...
          $evento->delete();
          return response()->noContent();
     }
